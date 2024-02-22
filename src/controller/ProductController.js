@@ -63,11 +63,11 @@ class ProductController {
     try {
       const productId = req.params.id;
       const data = req.body;
-      const { name, image, type, price, rating, description, countInStock } =
+      const { name, type, price, rating, description, countInStock } =
         req.body;
       if (
         !name ||
-        !image ||
+      
         !type ||
         !price ||
         !rating ||
