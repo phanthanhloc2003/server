@@ -9,6 +9,7 @@ router.put("/update-product/:id",authMiddleware ,productController.updateProduct
 router.get("/details-product/:id",productController.detailsProduct )
 router.delete("/delete-product/:id",productController.deleteProduct )
 router.get("/getAll-product",productController.getAllProduct )
+router.delete("/deleteMany",productController.deleteMany )
 
 
 

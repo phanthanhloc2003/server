@@ -125,7 +125,11 @@ class ProductController {
       });
     }
   }
-
+   async deleteMany(req, res, next) {
+console.log("id",req.body )
+const id = req.body
+const deleteManyProduct = await Product.deleteMany({_id: { $in: id}})
+   }
   async deleteProduct(req, res, next) {
     try {
       const productId = req.params.id;

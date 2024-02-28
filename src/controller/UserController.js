@@ -92,7 +92,7 @@ class UserController {
         id: checkUser._id,
         isAdmin: checkUser.isAdmin,
       });
-
+      
       const refresh_Token = await genneraRefreshToken({
         id: checkUser._id,
         isAdmin: checkUser.isAdmin,
@@ -262,7 +262,7 @@ class UserController {
       }
 
       const hash = await bcrypt.hashSync(password, saltRounds);
-      console.log({ password: hash });
+    
 
       const updateUser = await User.findByIdAndUpdate(
         userId,
@@ -282,9 +282,9 @@ class UserController {
       });
     }
   }
+
   async uploadImage(req, res, next) {
     if (!req.file) return res.status(400).send("Upload File Không THành Công.");
-    // update trường avata trong db thành đường dẩn tới file
     try {
       const result = await User.updateOne(
         {
