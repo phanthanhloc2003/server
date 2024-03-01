@@ -125,11 +125,28 @@ class ProductController {
       });
     }
   }
-   async deleteMany(req, res, next) {
-console.log("id",req.body )
-const id = req.body
-const deleteManyProduct = await Product.deleteMany({_id: { $in: id}})
-   }
+  async deleteMany(req, res, next) {
+    try {
+        const ids = req.body;
+       
+        const deleteManyProduct = await Product.deleteMany({ _id: { $in: ids } });
+
+       
+        res.status(200).json({
+            success: true,
+            message: "Xóa thành công các mục đã chọn",
+            deletedCount: deleteManyProduct.deletedCount // Số lượng mục đã bị xóa
+        });
+    } catch (error) {
+        // Xử lý bất kỳ lỗi nào nếu có
+        console.error("Lỗi khi xóa nhiều mục:", error);
+        res.status(500).json({
+            success: false,
+            message: "Đã xảy ra lỗi khi xóa nhiều mục"
+        });
+    }
+}
+
   async deleteProduct(req, res, next) {
     try {
       const productId = req.params.id;
