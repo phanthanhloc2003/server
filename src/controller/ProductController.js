@@ -67,7 +67,6 @@ class ProductController {
         req.body;
       if (
         !name ||
-      
         !type ||
         !price ||
         !rating ||
@@ -172,24 +171,33 @@ class ProductController {
 
   async getAllProduct(req, res, next) {
     try {
-      const limit = parseInt(req.query.limit)
-      const page = parseInt(req.query.page)
+      const limit = parseInt(req.query.limit);
+      const page = parseInt(req.query.page);
+      const value = req.query.value || ""; // Nếu không có giá trị, mặc định là chuỗi rỗng
       const sort = req.query.sort;
       const type = req.query.type;
-
+      console.log("value", value);
       let sortObject = {};
       const totalProduct = await Product.countDocuments();
       sortObject[sort] = type === "asc" ? 1 : -1;
-
-      const products = await Product.find()
-        .skip(page ? page * limit : 0 )
+  
+      let query = {}; // Tạo một object query rỗng
+  
+      // Kiểm tra nếu có giá trị value
+      if (value) {
+        query["$or"] = [{ "name": { $regex: value, $options: "i" } }];
+      }
+  
+      // Thực hiện truy vấn dựa trên query
+      const products = await Product.find(query)
+        .skip(page ? page * limit : 0)
         .limit(limit || 0)
         .sort(sortObject);
-
+  
       res.json({
         status: "success",
         message: "Products found",
-        data: products ,
+        data: products,
         total: totalProduct,
         pageCurrent: page + 1,
         pageTotal: Math.ceil(totalProduct / limit),
@@ -201,6 +209,7 @@ class ProductController {
       });
     }
   }
+  
   async userGetAllProduct(){
   const products = await Product.find()
   res.json({
