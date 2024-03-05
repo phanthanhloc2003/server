@@ -176,7 +176,7 @@ class ProductController {
       const value = req.query.value || ""; // Nếu không có giá trị, mặc định là chuỗi rỗng
       const sort = req.query.sort;
       const type = req.query.type;
-      console.log("value", value);
+    
       let sortObject = {};
       const totalProduct = await Product.countDocuments();
       sortObject[sort] = type === "asc" ? 1 : -1;

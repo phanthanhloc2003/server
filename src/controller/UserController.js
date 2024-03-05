@@ -224,7 +224,7 @@ class UserController {
         });
       }
       const refreshToken = await refreshTokenJwtService(token);
-      res.json({
+      res.status(200).json({
         status: "success",
         message: "User details refreshToken",
         data: refreshToken,
