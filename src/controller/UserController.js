@@ -7,6 +7,7 @@ const { avatarPath } = require("../constant/pathImages");
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const Address = require("../models/AddressModel");
 
 class UserController {
   async signUp(req, res, next) {
@@ -92,7 +93,7 @@ class UserController {
         id: checkUser._id,
         isAdmin: checkUser.isAdmin,
       });
-      
+
       const refresh_Token = await genneraRefreshToken({
         id: checkUser._id,
         isAdmin: checkUser.isAdmin,
@@ -262,7 +263,6 @@ class UserController {
       }
 
       const hash = await bcrypt.hashSync(password, saltRounds);
-    
 
       const updateUser = await User.findByIdAndUpdate(
         userId,
@@ -282,7 +282,155 @@ class UserController {
       });
     }
   }
+  async address(req, res) {
+    const userId = req.userInfo.id;
+    const address = req.body;
 
+    const checkUser = await User.findOne({
+      _id: userId,
+    });
+    if (!checkUser) {
+      return res.status(400).send("người dùng không tồn tại");
+    }
+    try {
+      const embeddedDocuments = checkUser.address;
+      const isDefaultAddressExists = embeddedDocuments.some(
+        (embeddedDocument) =>
+          embeddedDocument.ischeck &&
+          embeddedDocument.ischeck === address.ischeck
+      );
+      if (isDefaultAddressExists) {
+        return res.status(400).send("Chỉ được phép có một địa chỉ mặc định");
+      }
+      const newAddress = new Address(address);
+      await newAddress.save();
+
+      const updateUser = await User.findByIdAndUpdate(userId, {
+        $push: { address: newAddress },
+      });
+      return res.status(200).json({
+        status: "success",
+        message: "cập nhâpj thành công",
+        data: updateUser,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
+
+  async updateAddress(req, res) {
+    const address = req.body;
+    const idAdress = req.params.id;
+    const userId = req.userInfo.id;
+
+    const checkUser = await User.findOne({
+      _id: userId,
+    });
+    if (!checkUser) {
+      return res.status(400).send("người dùng không tồn tại");
+    }
+    try {
+      const embeddedDocuments = checkUser.address;
+      const updateAddress = await Address.findByIdAndUpdate(idAdress, address, {
+        new: true,
+      });
+
+      const addressIndex = embeddedDocuments.findIndex((embeddedDocument) =>
+        embeddedDocument._id.equals(idAdress)
+      );
+      if (addressIndex !== -1) {
+        embeddedDocuments[addressIndex]._doc = updateAddress;
+      }
+
+    
+
+      await Address.findByIdAndUpdate(idAdress, address);
+      await User.updateOne(
+        { _id: userId, "address._id": idAdress },
+        {
+          $set: {
+            "address.$.company": address.company,
+            "address.$.name": address.name,
+            "address.$.selectedDistrict": address.selectedDistrict,
+            "address.$.selectedProvince": address.selectedProvince,
+            "address.$.selectedWard": address.selectedWard,
+            "address.$.telephone": address.telephone,
+            "address.$.street": address.street,
+            "address.$.value": address.value,
+            "address.$.ischeck": address.ischeck,
+            "address.$.region": address.region,
+          },
+        }
+      );
+      return res.status(200).json({
+        status: "success",
+        message: "Cập nhật thành công",
+        data: address,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
+  async detailAddress(req, res) {
+    const idAddress = req.params.id;
+    if (!idAddress) {
+      return res.status(400).json({
+        status: "error",
+        message: "không có địa chỉ id",
+      });
+    }
+
+    try {
+      const address = await Address.findOne({
+        _id: idAddress,
+      });
+      return res.status(200).json({
+        status: "success",
+        message: "update thành công",
+        data: address,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
+  async deleteAddress(req, res) {
+    const idAddress = req.params.id;
+    const userId = req.userInfo.id;
+
+    if (!idAddress) {
+      return res.status(400).json({
+        status: "error",
+        message: "lõi ko tìm thấy địa chỉ id",
+      });
+    }
+    try {
+      const address = await Address.findOneAndDelete(idAddress);
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { address: { _id: idAddress } } }
+      
+      );
+      return res.status(200).json({
+        status: "success",
+        message: "delete thành công",
+        data: address,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: "error",
+        message: error.message,
+      });
+    }
+  }
   async uploadImage(req, res, next) {
     if (!req.file) return res.status(400).send("Upload File Không THành Công.");
     try {

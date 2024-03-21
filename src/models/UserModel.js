@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const addressSchema = require("./AddressModel");
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -15,22 +16,19 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     phone: {
-      type: String, 
+      type: String,
       required: true,
     },
-    address: {
-      type: String,
-    },
+    address: [addressSchema.schema],
     avata: {
       type: String,
     },
     nickname: {
-      type:String,
+      type: String,
     },
     refresh_token: { type: String },
     access_token: { type: String },
-    isAdmin: {  type: Boolean,
-      default: false, }, 
+    isAdmin: { type: Boolean, default: false },
   },
   {
     timestamps: true,
@@ -39,3 +37,4 @@ const userSchema = new mongoose.Schema(
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
+

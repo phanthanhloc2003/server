@@ -5,7 +5,7 @@ const authMiddleware = (req, res, next) => {
 
   jwt.verify(token, "access_token", function (err, user) {
     if (err) {
-        return res.status(401).json({
+        return res.status(403).json({
           message: `Invalid token: ${err.message}`,
         });
       }
@@ -14,11 +14,12 @@ const authMiddleware = (req, res, next) => {
       next()
     }
     else{
-        return res.status(401).json({
+        return res.status(403).json({
             message: "Invalid token",
         });
     }
   });
+  
 };
 
 module.exports = { authMiddleware };
