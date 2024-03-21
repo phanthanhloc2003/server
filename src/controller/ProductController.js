@@ -4,13 +4,11 @@ const Product = require("../models/ProductModel");
 class ProductController {
   async addProduct(req, res, next) {
     if (!req.file) return res.status(400).send("vui lòng chọn ảnh");
-  
     try {
       const { name, type, price, rating, description, countInStock } =
         req.body;
       if (
         !name ||
-       
         !type ||
         !price ||
         !rating ||
@@ -18,21 +16,10 @@ class ProductController {
         !countInStock
       ) {
         return res.status(400).json({
-          status: "error",
+          status: "errors",
           message: "All input fields are required",
         });
       }
-
-      const checkProduct = await Product.findOne({
-        name: name,
-      });
-      if (checkProduct !== null) {
-        return res.status(400).json({
-          status: "error",
-          message: "Product already exists",
-        });
-      }
-
       const product = new Product({...req.body,image: `${imagePath}${req.file.filename}` });
       await product
         .save()
@@ -50,10 +37,9 @@ class ProductController {
           });
         });
     } catch (error) {
-      console.error(error);
-
+      
       return res.status(500).json({
-        status: "error",
+        status: "errorss",
         message: error.message,
       });
     }
@@ -210,14 +196,22 @@ class ProductController {
     }
   }
   
-  async userGetAllProduct(){
-  const products = await Product.find()
+  async getAllType(req , res ) {
+    try {
+      const type = await Product.distinct("type")
   res.json({
     status: "success",
-    message: "Products found",
-    data: products ,
+    message: "type found",
+    data: type ,
   
   });
+    } catch (error) {
+      res.status(500).json({
+        status: "error",
+        message: error.message,
+      })
+    }
+  
   }
 }
 
